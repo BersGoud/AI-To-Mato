@@ -1,0 +1,156 @@
+openapi: 3.0.0
+info:
+  title: API for AI-To-Mato
+  version: '0.1'
+  description: API documentation for the StyleMind project.
+  license:
+    name: MIT License
+    url: https://opensource.org/licenses/MIT
+paths:
+  /online:
+    summary: Test to see if the backend is online and acepting requests
+    get:
+      summary: Test Get
+      description: A test GET to see if the backend is online
+      operationId: online_get
+      responses:
+        '200':
+          description: Method succesfull
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessTest'
+        '404':
+          description: Failed to get response within 5 seconds
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FailTest'
+      tags:
+        - Not yet implemented
+        - Online
+  /upload:
+    summary: Upload pictures
+    get:
+      summary: Returns amount of pictures uploaded
+      description: Returns the amount of pictures that are currently ready to be classified
+      operationId: upload_get
+      tags:
+        - Not yet implemented
+        - Upload
+      responses:
+        '200':
+          description: Method succesfull
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessUploadGet'
+        '404':
+          description: Failed to get response within 5 seconds
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FailTest'
+
+    post:
+      summary: Upload Picture
+      description: >-
+        Upload the pictures from the front-end to the back-end. These pictures
+        will later be used for the predict route (Nog parameters toevoegen)
+      operationId: upload_post
+      responses:
+        '200':
+          description: Method succesfull
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessUploadPost'
+        '404':
+          description: Failed to get response within 5 seconds
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FailTest'
+                
+                
+        '415':
+          description: Failed to get response within 5 seconds
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FailUnsuportedFileType'
+        '452':
+          description: Failed to get response within 5 seconds
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FailFileToBig'
+          
+      tags:
+        - Not yet implemented
+        - Upload
+        
+components:
+  schemas:
+    SuccessTest:
+      type: object
+      properties:
+        Response:
+          type: string
+          example: Method successful
+    FailTest:
+      type: object
+      properties:
+        Response:
+          type: string
+          example: Method failed within 5 seconds
+    SuccessUploadGet:
+      type: object
+      properties:
+        Response:
+          type: integer
+          example: 5
+          
+    SuccessUploadPost:
+      type: object
+      properties:
+        Response:
+          type: string
+          example: Picture uploaded succesfully
+          
+    FailUnsuportedFileType:
+      type: object
+      properties:
+        Response:
+          type: string
+          example: Unsupported Media Type
+    FailFileToBig:
+      type: object
+      properties:
+        Response:
+          type: string
+          example: Media File too big
+      
+          
+    SuccesClassificationGet:
+      type: object
+      properties:
+        Response:
+          type: object
+          example: {
+            "Final Grade": "A",
+            "Unique defect": 4,
+            "Defect percentages":{
+              "Overrijp": 0.78,
+              "Grote groeven": 0.65,
+              "Beschadigd": 0.54,
+              "Biologische bestrijding": 0.20
+            }
+          }
+    
+    FailNoPicture:
+      type: object
+      properties:
+        Response:
+          type: string
+          example: There where no pictures to classify
