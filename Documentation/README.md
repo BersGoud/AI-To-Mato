@@ -1,7 +1,7 @@
 # AI-To-Mato API Documentation
 
 This folder contains the documentation.
-To view the API documentation, run the following command:
+To view the API documentation, run the following command: (requires Docker)
 
 ```bash
 sh view-api-docs.sh
