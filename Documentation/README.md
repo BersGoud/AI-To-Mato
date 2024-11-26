@@ -1,4 +1,4 @@
-# StyleMind Backend
+# AI-To-Mato API Documentation
 
 This folder contains the documentation.
 To view the API documentation, run the following command:
