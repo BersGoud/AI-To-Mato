@@ -2,20 +2,20 @@ openapi: 3.0.0
 info:
   title: API for AI-To-Mato
   version: '0.1'
-  description: API documentation for the StyleMind project.
+  description: API documentation for the AI-To-Mato project.
   license:
     name: MIT License
     url: https://opensource.org/licenses/MIT
 paths:
   /online:
-    summary: Test to see if the backend is online and acepting requests
+    summary: Test to see if the backend is online and accepting requests
     get:
       summary: Test Get
       description: A test GET to see if the backend is online
       operationId: online_get
       responses:
         '200':
-          description: Method succesfull
+          description: Method successful
           content:
             application/json:
               schema:
@@ -40,7 +40,7 @@ paths:
         - Upload
       responses:
         '200':
-          description: Method succesfull
+          description: Method successful
           content:
             application/json:
               schema:
@@ -51,16 +51,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FailTest'
-
     post:
       summary: Upload Picture
       description: >-
         Upload the pictures from the front-end to the back-end. These pictures
-        will later be used for the predict route (Nog parameters toevoegen)
+        will later be used for the predict route.
       operationId: upload_post
+      requestBody:
+        description: Route that takes the pictures and sends them to the backend
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BodyUploadPost'
       responses:
         '200':
-          description: Method succesfull
+          description: Method successful
           content:
             application/json:
               schema:
@@ -71,25 +77,98 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FailTest'
-                
-                
         '415':
-          description: Failed to get response within 5 seconds
+          description: Unsupported media type
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FailUnsuportedFileType'
+                $ref: '#/components/schemas/FailUnsupportedFileType'
         '452':
-          description: Failed to get response within 5 seconds
+          description: Media file too big
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FailFileToBig'
-          
+                $ref: '#/components/schemas/FailFileTooBig'
       tags:
         - Not yet implemented
         - Upload
-        
+  /prediction:
+    summary: Used to predict
+    description: Path where processes about predicting will be placed
+    get:
+      summary: Start prediction
+      description: >-
+        A route that activates the prediction of the tomato with the pictures
+        uploaded in the upload route.
+      operationId: prediction_get
+      responses:
+        '200':
+          description: Method successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessClassificationGet'
+        '404':
+          description: Failed to get response within 5 seconds
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FailTest'
+        '453':
+          description: No pictures to classify
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FailNoPicture'
+      tags:
+        - Not yet implemented
+        - Predictions
+  /database:
+    summary: Route for database
+    description: This route will be used to retrieve data from the database
+    get:
+      summary: Get database entries
+      description: >-
+        Retrieve a number of entries (IDs) along with their predictions, defects,
+        and feedback if available.
+      operationId: database_get
+      parameters:
+        - name: amount
+          in: query
+          description: The number of database entries to retrieve
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            example: 10
+      responses:
+        '200':
+          description: Method successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessDatabaseGet'
+        '404':
+          description: Failed to retrieve data within 5 seconds
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FailTest'
+        '413':
+          description: Requested amount exceeds the available number of entries
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FailAmountExceedsEntries'
+        '452':
+          description: Requested amount is too large to process
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FailAmountTooLarge'
+      tags:
+        - Not yet implemented
+        - Database
 components:
   schemas:
     SuccessTest:
@@ -110,47 +189,92 @@ components:
         Response:
           type: integer
           example: 5
-          
     SuccessUploadPost:
       type: object
       properties:
         Response:
           type: string
-          example: Picture uploaded succesfully
-          
-    FailUnsuportedFileType:
+          example: Picture uploaded successfully
+    BodyUploadPost:
+      type: object
+      properties:
+        file:
+          type: string
+          format: binary
+          description: Upload an image (PNG or JPG format only).
+      required:
+        - file
+    FailUnsupportedFileType:
       type: object
       properties:
         Response:
           type: string
           example: Unsupported Media Type
-    FailFileToBig:
+    FailFileTooBig:
       type: object
       properties:
         Response:
           type: string
-          example: Media File too big
-      
-          
-    SuccesClassificationGet:
+          example: Media file too big
+    SuccessClassificationGet:
       type: object
       properties:
         Response:
           type: object
-          example: {
-            "Final Grade": "A",
-            "Unique defect": 4,
-            "Defect percentages":{
-              "Overrijp": 0.78,
-              "Grote groeven": 0.65,
-              "Beschadigd": 0.54,
-              "Biologische bestrijding": 0.20
-            }
-          }
-    
+          example:
+            Final Grade: A
+            Unique defect: 4
+            Defect percentages:
+              Overripe: 0.78
+              Large cracks: 0.65
+              Damaged: 0.54
+              Organic treatment: 0.2
     FailNoPicture:
       type: object
       properties:
         Response:
           type: string
-          example: There where no pictures to classify
+          example: There were no pictures to classify
+    SuccessDatabaseGet:
+      type: object
+      properties:
+        Response:
+          type: object
+          example:
+            1:
+              Final Grade: A
+              Unique defect: 4
+              Defect percentages:
+                Overripe: 0.78
+                Large cracks: 0.65
+                Damaged: 0.54
+                Organic treatment: 0.2
+            2:
+              Final Grade: B
+              Unique defect: 2
+              Defect percentages:
+                Overripe: 0.60
+                Damaged: 0.40
+    FailAmountExceedsEntries:
+      type: object
+      properties:
+        Response:
+          type: string
+          example: The requested amount exceeds the available database entries.
+    FailAmountTooLarge:
+      type: object
+      properties:
+        Response:
+          type: string
+          example: The requested amount is too large to process.
+tags:
+  - name: Not yet implemented
+    description: Routes that are not implemented yet
+  - name: Online
+    description: Routes to test if the backend is online
+  - name: Upload
+    description: Routes that relate to uploading pictures to the backend
+  - name: Predictions
+    description: Routes that relate to predicting labels based on uploaded pictures
+  - name: Database
+    description: Routes that relate to retrieving data from the database
